@@ -4,1813 +4,975 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Portfolio Monitor - Investment Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #1f2937 0%, #7c3aed 50%, #1f2937 100%);
-            font-family: 'Inter', sans-serif;
-        }
-        .glass {
-            background: rgba(31, 41, 55, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(107, 114, 128, 0.3);
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-        }
-        .sidebar-active {
-            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-        }
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-        .notification.show {
-            transform: translateX(0);
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-        }
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(31, 41, 55, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(107, 114, 128, 0.3);
-            border-radius: 8px;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-        }
-        .search-results.show {
-            display: block;
-        }
-        .user-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: rgba(31, 41, 55, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(107, 114, 128, 0.3);
-            border-radius: 8px;
-            min-width: 200px;
-            z-index: 100;
-            display: none;
-        }
-        .user-dropdown.show {
-            display: block;
-        }
-    </style>
 </head>
-<body class="min-h-screen text-white">
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="glass rounded-xl p-8 w-full max-w-md mx-4">
-            <h2 class="text-2xl font-bold text-white mb-6 text-center">Login to Your Account</h2>
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label class="block text-gray-300 text-sm font-medium mb-2">Email</label>
-                    <input type="email" id="loginEmail" required class="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
+<body>
+    <div class="container">
+        <!-- Navigation Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h2>Stock Portfolio<br><span>Monitor</span></h2>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <a href="#" class="nav-link" onclick="showPage('dashboard')">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showPage('portfolio')">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Portfolio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showPage('analysis')">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analysis</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showPage('watchlist')">
+                        <i class="fas fa-eye"></i>
+                        <span>Watchlist</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showPage('news')">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showPage('contact')">
+                        <i class="fas fa-envelope"></i>
+                        <span>Contact</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <!-- Header -->
+                <header class="header">
+                    <div class="header-left">
+                        <h1>Dashboard</h1>
+                        <p>Portfolio Overview & Market Analysis</p>
+                    </div>
+                    
+                    <div class="header-right">
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Search stocks, portfolios...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        
+                        <div class="notifications" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">3</span>
+                            <div class="notification-dropdown" id="notificationDropdown">
+                                <div class="notification-header">
+                                    <h3>Notifications</h3>
+                                    <span class="mark-read" onclick="markAllRead()">Mark all as read</span>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="notification-item unread">
+                                        <i class="fas fa-chart-line"></i>
+                                        <div class="notification-content">
+                                            <p>AAPL reached target price $175.00</p>
+                                            <span class="notification-time">2 minutes ago</span>
+                                        </div>
+                                    </div>
+                                    <div class="notification-item unread">
+                                        <i class="fas fa-trending-up"></i>
+                                        <div class="notification-content">
+                                            <p>Portfolio gained 2.5% today</p>
+                                            <span class="notification-time">1 hour ago</span>
+                                        </div>
+                                    </div>
+                                    <div class="notification-item">
+                                        <i class="fas fa-info-circle"></i>
+                                        <div class="notification-content">
+                                            <p>New market analysis available</p>
+                                            <span class="notification-time">3 hours ago</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="user-profile" onclick="toggleUserMenu()">
+                            <img src="https://via.placeholder.com/40x40/8B5CF6/FFFFFF?text=H" alt="User" class="user-avatar">
+                            <span class="user-name">Hamza</span>
+                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="user-info">
+                                    <h4>Hamza</h4>
+                                    <p>hamzamohamedcod@gmail.com</p>
+                                </div>
+                                <div class="user-menu">
+                                    <a href="#" onclick="openProfileSettings()">
+                                        <i class="fas fa-user-cog"></i>
+                                        Profile Settings
+                                    </a>
+                                    <a href="#" onclick="openNotificationSettings()">
+                                        <i class="fas fa-bell"></i>
+                                        Notifications
+                                    </a>
+                                    <a href="#" onclick="logout()">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Dashboard Content -->
+                <div class="dashboard-content">
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Total Portfolio Value</h3>
+                                <p class="stat-value">$72,518.55</p>
+                                <span class="stat-change positive">+8.62% vs last month</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Today's Gain/Loss</h3>
+                                <p class="stat-value">+$1,247.80</p>
+                                <span class="stat-change positive">+1.75% today</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Active Holdings</h3>
+                                <p class="stat-value">8</p>
+                                <span class="stat-change">Diversified portfolio</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Cash Available</h3>
+                                <p class="stat-value">$12,450.00</p>
+                                <span class="stat-change">Available for investment</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="charts-section">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>Portfolio Performance</h3>
+                                <div class="chart-controls">
+                                    <button class="period-btn active" onclick="updateChart('1M')">1M</button>
+                                    <button class="period-btn" onclick="updateChart('3M')">3M</button>
+                                    <button class="period-btn" onclick="updateChart('6M')">6M</button>
+                                    <button class="period-btn" onclick="updateChart('1Y')">1Y</button>
+                                </div>
+                            </div>
+                            <canvas id="portfolioChart"></canvas>
+                        </div>
+                        
+                        <div class="holdings-section">
+                            <div class="holdings-header">
+                                <h3>Top Holdings</h3>
+                                <button class="add-btn" onclick="openAddPosition()">
+                                    <i class="fas fa-plus"></i>
+                                    Add Position
+                                </button>
+                            </div>
+                            <div class="holdings-list">
+                                <div class="holding-item">
+                                    <div class="holding-icon">A</div>
+                                    <div class="holding-info">
+                                        <h4>AAPL</h4>
+                                        <p>Apple Inc.</p>
+                                    </div>
+                                    <div class="holding-value">
+                                        <p>$4,462.50</p>
+                                        <span class="positive">+20.4%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="holding-item">
+                                    <div class="holding-icon">M</div>
+                                    <div class="holding-info">
+                                        <h4>MSFT</h4>
+                                        <p>Microsoft Corp.</p>
+                                    </div>
+                                    <div class="holding-value">
+                                        <p>$1,575.00</p>
+                                        <span class="positive">+5.6%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="holding-item">
+                                    <div class="holding-icon">A</div>
+                                    <div class="holding-info">
+                                        <h4>AMZN</h4>
+                                        <p>Amazon.com Inc.</p>
+                                    </div>
+                                    <div class="holding-value">
+                                        <p>$217.50</p>
+                                        <span class="positive">+5.4%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="holding-item">
+                                    <div class="holding-icon">T</div>
+                                    <div class="holding-info">
+                                        <h4>TSLA</h4>
+                                        <p>Tesla Inc.</p>
+                                    </div>
+                                    <div class="holding-value">
+                                        <p>-$506.25</p>
+                                        <span class="negative">-11.0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="view-all-btn">View Full Portfolio</button>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-gray-300 text-sm font-medium mb-2">Password</label>
-                    <input type="password" id="loginPassword" required class="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <!-- Portfolio Page -->
+            <div id="portfolio" class="page">
+                <header class="header">
+                    <div class="header-left">
+                        <h1>Portfolio</h1>
+                        <p>Detailed view of your holdings</p>
+                    </div>
+                    <div class="header-right">
+                        <button class="add-btn" onclick="openAddPosition()">
+                            <i class="fas fa-plus"></i>
+                            Add Position
+                        </button>
+                        <button class="filter-btn" onclick="openPortfolioFilter()">
+                            <i class="fas fa-filter"></i>
+                            Filter
+                        </button>
+                    </div>
+                </header>
+
+                <div class="portfolio-content">
+                    <div class="portfolio-stats">
+                        <div class="stat-card">
+                            <h3>Total Portfolio Value</h3>
+                            <p class="stat-value">$38,881.75</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Today's Change</h3>
+                            <p class="stat-value positive">+$284.00</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Return</h3>
+                            <p class="stat-value positive">+$8754.75</p>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-table">
+                        <div class="table-header">
+                            <input type="text" placeholder="Search holdings..." class="search-input">
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Shares</th>
+                                    <th>Avg Price</th>
+                                    <th>Current Price</th>
+                                    <th>Market Value</th>
+                                    <th>Day Change</th>
+                                    <th>Total Return</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="stock-info">
+                                            <strong>AAPL</strong>
+                                            <span>Apple Inc.</span>
+                                        </div>
+                                    </td>
+                                    <td>50</td>
+                                    <td>$150.25</td>
+                                    <td>$189.25</td>
+                                    <td>$9,462.5</td>
+                                    <td class="positive">+$3.90 (+2.06%)</td>
+                                    <td class="positive">+$1950.00 (+26.0%)</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="stock-info">
+                                            <strong>MSFT</strong>
+                                            <span>Microsoft Corporation</span>
+                                        </div>
+                                    </td>
+                                    <td>25</td>
+                                    <td>$280.50</td>
+                                    <td>$343.00</td>
+                                    <td>$8,575</td>
+                                    <td class="positive">+$6.25 (+1.82%)</td>
+                                    <td class="positive">+$1562.50 (+22.3%)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <button type="submit" class="w-full gradient-bg text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all">
-                    Login
-                </button>
-                <p class="text-center text-gray-400 text-sm">
-                    Don't have an account? 
-                    <a href="#" onclick="showRegister()" class="text-purple-400 hover:text-purple-300">Sign up</a>
-                </p>
+            </div>
+
+            <!-- Analysis Page -->
+            <div id="analysis" class="page">
+                <header class="header">
+                    <div class="header-left">
+                        <h1>Analysis</h1>
+                        <p>Advanced portfolio analytics and market insights</p>
+                    </div>
+                    <div class="header-right">
+                        <div class="analysis-controls">
+                            <button class="period-btn active" onclick="updateAnalysis('1M')">1M</button>
+                            <button class="period-btn" onclick="updateAnalysis('3M')">3M</button>
+                            <button class="period-btn" onclick="updateAnalysis('6M')">6M</button>
+                            <button class="period-btn" onclick="updateAnalysis('1Y')">1Y</button>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="analysis-content">
+                    <div class="analysis-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>YTD Return</h3>
+                                <p class="stat-value positive">+18.7%</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Alpha</h3>
+                                <p class="stat-value positive">+4.2%</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Hit Rate</h3>
+                                <p class="stat-value">67%</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-area"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Correlation</h3>
+                                <p class="stat-value">0.85</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-charts">
+                        <div class="chart-container">
+                            <h3>Performance Comparison</h3>
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Sector Allocation</h3>
+                            <canvas id="sectorChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Watchlist Page -->
+            <div id="watchlist" class="page">
+                <header class="header">
+                    <div class="header-left">
+                        <h1>Watchlist</h1>
+                        <p>Track your favorite stocks and market opportunities</p>
+                    </div>
+                    <div class="header-right">
+                        <button class="add-btn" onclick="openAddStock()">
+                            <i class="fas fa-plus"></i>
+                            Add Stock
+                        </button>
+                        <button class="filter-btn" onclick="openWatchlistFilter()">
+                            <i class="fas fa-filter"></i>
+                            Filter
+                        </button>
+                    </div>
+                </header>
+
+                <div class="watchlist-content">
+                    <div class="watchlist-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Watched Stocks</h3>
+                                <p class="stat-value">12</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Gainers</h3>
+                                <p class="stat-value">8</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Losers</h3>
+                                <p class="stat-value">4</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Active Alerts</h3>
+                                <p class="stat-value">5</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="watchlist-filters">
+                        <button class="filter-btn active" onclick="filterWatchlist('all')">All Stocks</button>
+                        <button class="filter-btn" onclick="filterWatchlist('watched')">Watched</button>
+                        <button class="filter-btn" onclick="filterWatchlist('alerts')">With Alerts</button>
+                        <input type="text" placeholder="Search stocks..." class="search-input">
+                    </div>
+
+                    <div class="watchlist-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Stock</th>
+                                    <th>Price</th>
+                                    <th>Change</th>
+                                    <th>Volume</th>
+                                    <th>Market Cap</th>
+                                    <th>P/E</th>
+                                    <th>Alerts</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="stock-info">
+                                            <i class="fas fa-star"></i>
+                                            <div>
+                                                <strong>META</strong>
+                                                <span>Meta Platforms Inc.</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>$485.20</td>
+                                    <td class="positive">+$12.45 (+2.63%)</td>
+                                    <td>15.2M</td>
+                                    <td>1.23T</td>
+                                    <td>24.5</td>
+                                    <td><span class="alert-badge">2</span></td>
+                                    <td>
+                                        <button class="action-btn">Add to Portfolio</button>
+                                        <button class="action-btn remove">Remove</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="stock-info">
+                                            <i class="fas fa-star"></i>
+                                            <div>
+                                                <strong>NFLX</strong>
+                                                <span>Netflix Inc.</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>$445.75</td>
+                                    <td class="negative">-$8.30 (-1.83%)</td>
+                                    <td>8.7M</td>
+                                    <td>198.5B</td>
+                                    <td>28.3</td>
+                                    <td><span class="alert-badge">1</span></td>
+                                    <td>
+                                        <button class="action-btn">Add to Portfolio</button>
+                                        <button class="action-btn remove">Remove</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Page -->
+            <div id="news" class="page">
+                <header class="header">
+                    <div class="header-left">
+                        <h1>Market News</h1>
+                        <p>Stay updated with the latest financial news and market insights</p>
+                    </div>
+                    <div class="header-right">
+                        <button class="filter-btn" onclick="openNewsFilter()">
+                            <i class="fas fa-filter"></i>
+                            Filter
+                        </button>
+                    </div>
+                </header>
+
+                <div class="news-content">
+                    <div class="market-indices">
+                        <div class="index-card">
+                            <div class="index-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="index-info">
+                                <h3>S&P 500</h3>
+                                <p class="index-value">4,785.23</p>
+                                <span class="positive">+1.2%</span>
+                            </div>
+                        </div>
+                        <div class="index-card">
+                            <div class="index-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="index-info">
+                                <h3>NASDAQ</h3>
+                                <p class="index-value">15,234.67</p>
+                                <span class="positive">+0.8%</span>
+                            </div>
+                        </div>
+                        <div class="index-card">
+                            <div class="index-icon">
+                                <i class="fas fa-chart-area"></i>
+                            </div>
+                            <div class="index-info">
+                                <h3>DOW</h3>
+                                <p class="index-value">38,456.12</p>
+                                <span class="negative">-0.3%</span>
+                            </div>
+                        </div>
+                        <div class="index-card">
+                            <div class="index-icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="index-info">
+                                <h3>VIX</h3>
+                                <p class="index-value">18.45</p>
+                                <span class="negative">-2.1%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="news-filters">
+                        <button class="news-filter-btn active" onclick="filterNews('all')">All</button>
+                        <button class="news-filter-btn" onclick="filterNews('technology')">Technology</button>
+                        <button class="news-filter-btn" onclick="filterNews('economy')">Economy</button>
+                        <button class="news-filter-btn" onclick="filterNews('crypto')">Crypto</button>
+                        <button class="news-filter-btn" onclick="filterNews('energy')">Energy</button>
+                        <button class="news-filter-btn" onclick="filterNews('healthcare')">Healthcare</button>
+                        <input type="text" placeholder="Search news..." class="search-input">
+                    </div>
+
+                    <div class="news-grid" id="newsGrid">
+                        <article class="news-card" data-category="technology">
+                            <div class="news-category">Technology</div>
+                            <h3>Tech Stocks Rally as AI Optimism Drives Market Higher</h3>
+                            <p>Major technology companies see significant gains as investors remain bullish on artificial intelligence developments and their potential impact on future earnings.</p>
+                            <div class="news-meta">
+                                <span class="news-time">2 hours ago</span>
+                                <span class="news-source">Financial Times</span>
+                            </div>
+                            <div class="news-tags">
+                                <span class="tag">AAPL</span>
+                                <span class="tag">MSFT</span>
+                                <span class="tag">GOOGL</span>
+                                <span class="tag">+1 more</span>
+                            </div>
+                            <button class="read-more-btn">Read more</button>
+                        </article>
+
+                        <article class="news-card" data-category="economy">
+                            <div class="news-category">Economy</div>
+                            <h3>Federal Reserve Signals Potential Rate Cuts in 2025</h3>
+                            <p>Fed officials hint at possible monetary policy adjustments as inflation shows signs of cooling, potentially benefiting growth stocks and market sentiment.</p>
+                            <div class="news-meta">
+                                <span class="news-time">4 hours ago</span>
+                                <span class="news-source">Reuters</span>
+                            </div>
+                            <div class="news-tags">
+                                <span class="tag">SPY</span>
+                                <span class="tag">QQQ</span>
+                                <span class="tag">IWM</span>
+                            </div>
+                            <button class="read-more-btn">Read more</button>
+                        </article>
+
+                        <article class="news-card" data-category="crypto">
+                            <div class="news-category">Crypto</div>
+                            <h3>Bitcoin Surges Past $45,000 on Institutional Adoption</h3>
+                            <p>Cryptocurrency markets show strong momentum as major institutions announce increased Bitcoin allocations and regulatory clarity improves globally.</p>
+                            <div class="news-meta">
+                                <span class="news-time">6 hours ago</span>
+                                <span class="news-source">CoinDesk</span>
+                            </div>
+                            <div class="news-tags">
+                                <span class="tag">BTC</span>
+                                <span class="tag">ETH</span>
+                                <span class="tag">COIN</span>
+                            </div>
+                            <button class="read-more-btn">Read more</button>
+                        </article>
+
+                        <article class="news-card" data-category="energy">
+                            <div class="news-category">Energy</div>
+                            <h3>Oil Prices Rise on Supply Concerns and Geopolitical Tensions</h3>
+                            <p>Crude oil futures climb as supply disruptions and ongoing geopolitical developments create uncertainty in global energy markets.</p>
+                            <div class="news-meta">
+                                <span class="news-time">8 hours ago</span>
+                                <span class="news-source">Bloomberg</span>
+                            </div>
+                            <div class="news-tags">
+                                <span class="tag">XOM</span>
+                                <span class="tag">CVX</span>
+                                <span class="tag">COP</span>
+                            </div>
+                            <button class="read-more-btn">Read more</button>
+                        </article>
+
+                        <article class="news-card" data-category="healthcare">
+                            <div class="news-category">Healthcare</div>
+                            <h3>Biotech Breakthrough Drives Healthcare Sector Gains</h3>
+                            <p>Revolutionary treatment shows promising results in clinical trials, boosting investor confidence in biotechnology and pharmaceutical companies.</p>
+                            <div class="news-meta">
+                                <span class="news-time">10 hours ago</span>
+                                <span class="news-source">Medical News</span>
+                            </div>
+                            <div class="news-tags">
+                                <span class="tag">JNJ</span>
+                                <span class="tag">PFE</span>
+                                <span class="tag">MRNA</span>
+                            </div>
+                            <button class="read-more-btn">Read more</button>
+                        </article>
+
+                        <article class="news-card" data-category="technology">
+                            <div class="news-category">Technology</div>
+                            <h3>Cloud Computing Giants Report Record Quarterly Earnings</h3>
+                            <p>Major cloud service providers exceed expectations with strong revenue growth driven by enterprise digital transformation initiatives.</p>
+                            <div class="news-meta">
+                                <span class="news-time">12 hours ago</span>
+                                <span class="news-source">Tech Crunch</span>
+                            </div>
+                            <div class="news-tags">
+                                <span class="tag">AMZN</span>
+                                <span class="tag">MSFT</span>
+                                <span class="tag">GOOGL</span>
+                            </div>
+                            <button class="read-more-btn">Read more</button>
+                        </article>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Page -->
+            <div id="contact" class="page">
+                <header class="header">
+                    <div class="header-left">
+                        <h1>Contact Us</h1>
+                        <p>Get in touch with our support team</p>
+                    </div>
+                </header>
+
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Email</h3>
+                                <p>hamzamohamedcod@gmail.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Phone</h3>
+                                <p>+60 11-21026731</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Location</h3>
+                                <p>Malacca, Malaysia</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-form">
+                        <h3>Send us a message</h3>
+                        <form id="contactForm" onsubmit="submitContactForm(event)">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <input type="text" id="subject" name="subject" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="message">Message</label>
+                                <textarea id="message" name="message" rows="5" required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Position Modal -->
+    <div id="addPositionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Position</h3>
+                <button class="close-btn" onclick="closeModal('addPositionModal')">&times;</button>
+            </div>
+            <form id="addPositionForm" onsubmit="addPosition(event)">
+                <div class="form-group">
+                    <label for="stockSymbol">Stock Symbol</label>
+                    <input type="text" id="stockSymbol" name="stockSymbol" placeholder="e.g., AAPL" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="companyName">Company Name</label>
+                    <input type="text" id="companyName" name="companyName" placeholder="e.g., Apple Inc." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="shares">Number of Shares</label>
+                    <input type="number" id="shares" name="shares" placeholder="e.g., 100" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="avgPrice">Average Purchase Price ($)</label>
+                    <input type="number" id="avgPrice" name="avgPrice" step="0.01" placeholder="e.g., 150.25" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="currentPrice">Current Price ($)</label>
+                    <input type="number" id="currentPrice" name="currentPrice" step="0.01" placeholder="e.g., 175.30" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sector">Sector</label>
+                    <select id="sector" name="sector" required>
+                        <option value="">Select Sector</option>
+                        <option value="technology">Technology</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="financial">Financial</option>
+                        <option value="consumer">Consumer Goods</option>
+                        <option value="energy">Energy</option>
+                        <option value="utilities">Utilities</option>
+                        <option value="realestate">Real Estate</option>
+                        <option value="materials">Materials</option>
+                        <option value="industrials">Industrials</option>
+                        <option value="telecom">Telecommunications</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="submit-btn">Add Position</button>
             </form>
         </div>
     </div>
 
-    <!-- Register Modal -->
-    <div id="registerModal" class="modal">
-        <div class="glass rounded-xl p-8 w-full max-w-md mx-4">
-            <h2 class="text-2xl font-bold text-white mb-6 text-center">Create New Account</h2>
-            <form id="registerForm" class="space-y-4">
-                <div>
-                    <label class="block text-gray-300 text-sm font-medium mb-2">Full Name</label>
-                    <input type="text" id="registerName" required class="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
+    <!-- Add Stock Modal -->
+    <div id="addStockModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Stock to Watchlist</h3>
+                <button class="close-btn" onclick="closeModal('addStockModal')">&times;</button>
+            </div>
+            <form id="addStockForm" onsubmit="addStock(event)">
+                <div class="form-group">
+                    <label for="watchStockSymbol">Stock Symbol</label>
+                    <input type="text" id="watchStockSymbol" name="stockSymbol" placeholder="e.g., NVDA" required>
                 </div>
-                <div>
-                    <label class="block text-gray-300 text-sm font-medium mb-2">Email</label>
-                    <input type="email" id="registerEmail" required class="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
+                
+                <div class="form-group">
+                    <label for="watchCompanyName">Company Name</label>
+                    <input type="text" id="watchCompanyName" name="companyName" placeholder="e.g., NVIDIA Corporation" required>
                 </div>
-                <div>
-                    <label class="block text-gray-300 text-sm font-medium mb-2">Password</label>
-                    <input type="password" id="registerPassword" required class="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
+                
+                <div class="form-group">
+                    <label for="watchCurrentPrice">Current Price ($)</label>
+                    <input type="number" id="watchCurrentPrice" name="currentPrice" step="0.01" placeholder="e.g., 220.50" required>
                 </div>
-                <button type="submit" class="w-full gradient-bg text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all">
-                    Create Account
-                </button>
-                <p class="text-center text-gray-400 text-sm">
-                    Already have an account? 
-                    <a href="#" onclick="showLogin()" class="text-purple-400 hover:text-purple-300">Login</a>
-                </p>
+                
+                <div class="form-group">
+                    <label for="targetPrice">Target Price ($)</label>
+                    <input type="number" id="targetPrice" name="targetPrice" step="0.01" placeholder="Optional">
+                </div>
+                
+                <button type="submit" class="submit-btn">Add to Watchlist</button>
             </form>
         </div>
     </div>
 
-    <!-- Notification -->
-    <div id="notification" class="notification glass rounded-lg p-4 max-w-sm">
-        <div class="flex items-center space-x-3">
-            <div id="notificationIcon" class="w-8 h-8 rounded-full flex items-center justify-center">
-                <i data-lucide="check" class="w-4 h-4"></i>
+    <!-- Profile Settings Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Profile Settings</h3>
+                <button class="close-btn" onclick="closeModal('profileModal')">&times;</button>
             </div>
-            <div>
-                <p id="notificationTitle" class="text-white font-medium text-sm"></p>
-                <p id="notificationMessage" class="text-gray-300 text-xs"></p>
-            </div>
+            <form id="profileForm" onsubmit="updateProfile(event)">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" value="Hamza" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profileEmail">Email</label>
+                    <input type="email" id="profileEmail" name="email" value="hamzamohamedcod@gmail.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" value="+60 11-21026731" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" value="Malacca, Malaysia" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="currency">Preferred Currency</label>
+                    <select id="currency" name="currency">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="MYR">MYR (RM)</option>
+                    </select>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Email Notifications</h4>
+                    
+                    <div class="checkbox-group">
+                        <label for="priceAlerts">
+                            <input type="checkbox" id="priceAlerts" name="priceAlerts" checked>
+                            Price Alerts
+                        </label>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label for="portfolioUpdates">
+                            <input type="checkbox" id="portfolioUpdates" name="portfolioUpdates" checked>
+                            Portfolio Updates
+                        </label>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label for="marketNews">
+                            <input type="checkbox" id="marketNews" name="marketNews">
+                            Market News
+                        </label>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label for="weeklyReports">
+                            <input type="checkbox" id="weeklyReports" name="weeklyReports">
+                            Weekly Reports
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Save Changes</button>
+            </form>
         </div>
     </div>
 
-    <!-- Sidebar -->
-    <div class="fixed left-0 top-0 h-full w-64 glass">
-        <div class="p-6">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
-                    <i data-lucide="bar-chart-3" class="w-6 h-6 text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-white">Stock Portfolio</h1>
-                    <p class="text-sm text-gray-400">Monitor</p>
-                </div>
-            </div>
-
-            <nav class="space-y-2">
-                <a href="#dashboard" onclick="showPage('dashboard')" class="nav-link sidebar-active flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                    <span class="font-medium">Dashboard</span>
-                </a>
-                <a href="#portfolio" onclick="showPage('portfolio')" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-300 hover:bg-gray-700/50 hover:text-white">
-                    <i data-lucide="pie-chart" class="w-5 h-5"></i>
-                    <span class="font-medium">Portfolio</span>
-                </a>
-                <a href="#analysis" onclick="showPage('analysis')" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-300 hover:bg-gray-700/50 hover:text-white">
-                    <i data-lucide="trending-up" class="w-5 h-5"></i>
-                    <span class="font-medium">Analysis</span>
-                </a>
-                <a href="#watchlist" onclick="showPage('watchlist')" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-300 hover:bg-gray-700/50 hover:text-white">
-                    <i data-lucide="eye" class="w-5 h-5"></i>
-                    <span class="font-medium">Watchlist</span>
-                </a>
-                <a href="#news" onclick="showPage('news')" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-300 hover:bg-gray-700/50 hover:text-white">
-                    <i data-lucide="newspaper" class="w-5 h-5"></i>
-                    <span class="font-medium">News</span>
-                </a>
-                <a href="#contact" onclick="showPage('contact')" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-300 hover:bg-gray-700/50 hover:text-white">
-                    <i data-lucide="mail" class="w-5 h-5"></i>
-                    <span class="font-medium">Contact</span>
-                </a>
-            </nav>
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="notification-toast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle"></i>
+            <span id="toastMessage">Action completed successfully!</span>
         </div>
+        <button class="toast-close" onclick="closeToast()">&times;</button>
     </div>
 
-    <!-- Main Content -->
-    <main class="ml-64 p-6">
-        <!-- Dashboard Page -->
-        <div id="dashboard" class="page">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Dashboard</h1>
-                    <p class="text-gray-400">Portfolio Overview & Market Analysis</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-                        <input type="text" id="searchInput" placeholder="Search stocks, portfolios..." class="glass rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500" onkeyup="performSearch(this.value)">
-                        <div id="searchResults" class="search-results"></div>
-                    </div>
-                    <div class="relative">
-                        <button id="notificationBtn" onclick="toggleNotifications()" class="p-2 glass rounded-lg hover:bg-gray-700/50 transition-colors relative">
-                            <i data-lucide="bell" class="w-5 h-5 text-gray-400"></i>
-                            <span id="notificationBadge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">3</span>
-                        </button>
-                    </div>
-                    <div class="relative">
-                        <button onclick="toggleUserDropdown()" class="flex items-center space-x-2 p-2 glass rounded-lg hover:bg-gray-700/50 transition-colors">
-                            <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
-                                <i data-lucide="user" class="w-4 h-4 text-white"></i>
-                            </div>
-                            <span id="userName" class="text-white font-medium">Guest User</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                        </button>
-                        <div id="userDropdown" class="user-dropdown">
-                            <div class="p-4 border-b border-gray-600">
-                                <p class="text-white font-medium" id="dropdownUserName">Guest User</p>
-                                <p class="text-gray-400 text-sm" id="dropdownUserEmail">guest@example.com</p>
-                            </div>
-                            <div class="p-2">
-                                <button onclick="showProfile()" class="w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-700/50 rounded-lg flex items-center space-x-2">
-                                    <i data-lucide="user" class="w-4 h-4"></i>
-                                    <span>Profile Settings</span>
-                                </button>
-                                <button onclick="showNotificationSettings()" class="w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-700/50 rounded-lg flex items-center space-x-2">
-                                    <i data-lucide="bell" class="w-4 h-4"></i>
-                                    <span>Notifications</span>
-                                </button>
-                                <button onclick="logout()" class="w-full text-left px-3 py-2 text-red-400 hover:bg-gray-700/50 rounded-lg flex items-center space-x-2">
-                                    <i data-lucide="log-out" class="w-4 h-4"></i>
-                                    <span>Logout</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-400 text-sm">Total Portfolio Value</p>
-                            <p class="text-2xl font-bold text-white">$72,518.55</p>
-                            <p class="text-green-400 text-sm flex items-center mt-1">
-                                <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
-                                +8.62% vs last month
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="trending-up" class="w-6 h-6 text-green-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-400 text-sm">Today's Gain/Loss</p>
-                            <p class="text-2xl font-bold text-green-400">+$1,247.80</p>
-                            <p class="text-green-400 text-sm flex items-center mt-1">
-                                <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
-                                +1.75% today
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="dollar-sign" class="w-6 h-6 text-green-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-400 text-sm">Active Holdings</p>
-                            <p class="text-2xl font-bold text-white">8</p>
-                            <p class="text-blue-400 text-sm mt-1">Diversified portfolio</p>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="pie-chart" class="w-6 h-6 text-blue-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-400 text-sm">Cash Available</p>
-                            <p class="text-2xl font-bold text-white">$12,450.00</p>
-                            <p class="text-yellow-400 text-sm mt-1">Available for Investment</p>
-                        </div>
-                        <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="dollar-sign" class="w-6 h-6 text-yellow-400"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts and Holdings -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Portfolio Performance Chart -->
-                <div class="lg:col-span-2 glass rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-xl font-bold text-white">Portfolio Performance</h3>
-                        <div class="flex space-x-2">
-                            <button onclick="updateChart('1M')" class="px-3 py-1 bg-green-500 text-white rounded-lg text-sm">1M</button>
-                            <button onclick="updateChart('3M')" class="px-3 py-1 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">3M</button>
-                            <button onclick="updateChart('1Y')" class="px-3 py-1 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">1Y</button>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="portfolioChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Top Holdings -->
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-white mb-6">Top Holdings</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center">
-                                    <span class="text-white font-bold text-sm">A</span>
-                                </div>
-                                <div>
-                                    <p class="text-white font-medium">AAPL</p>
-                                    <p class="text-gray-400 text-sm">Apple Inc.</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-medium text-green-400">+20.4%</p>
-                                <p class="text-gray-300 text-sm">$4,462.50</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                                    <span class="text-white font-bold text-sm">M</span>
-                                </div>
-                                <div>
-                                    <p class="text-white font-medium">MSFT</p>
-                                    <p class="text-gray-400 text-sm">Microsoft Corp.</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-medium text-green-400">+5.6%</p>
-                                <p class="text-gray-300 text-sm">$1,575.00</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                                    <span class="text-white font-bold text-sm">A</span>
-                                </div>
-                                <div>
-                                    <p class="text-white font-medium">AMZN</p>
-                                    <p class="text-gray-400 text-sm">Amazon.com Inc.</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-medium text-green-400">+5.4%</p>
-                                <p class="text-gray-300 text-sm">$217.50</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
-                                    <span class="text-white font-bold text-sm">T</span>
-                                </div>
-                                <div>
-                                    <p class="text-white font-medium">TSLA</p>
-                                    <p class="text-gray-400 text-sm">Tesla Inc.</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-medium text-red-400">-11.0%</p>
-                                <p class="text-gray-300 text-sm">-$506.25</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="showPage('portfolio')" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors">
-                        View Full Portfolio
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Portfolio Page -->
-        <div id="portfolio" class="page hidden">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Portfolio</h1>
-                    <p class="text-gray-400">Detailed view of your holdings</p>
-                </div>
-                <button onclick="showAddPosition()" class="flex items-center space-x-2 gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    <span>Add Position</span>
-                </button>
-            </div>
-
-            <!-- Portfolio Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-gray-400 text-sm mb-2">Total Portfolio Value</h3>
-                    <p class="text-3xl font-bold text-white">$38,881.75</p>
-                </div>
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-gray-400 text-sm mb-2">Today's Change</h3>
-                    <p class="text-3xl font-bold text-green-400">+$284.00</p>
-                </div>
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-gray-400 text-sm mb-2">Total Return</h3>
-                    <p class="text-3xl font-bold text-green-400">+$8754.75</p>
-                </div>
-            </div>
-
-            <!-- Search and Filter -->
-            <div class="flex items-center space-x-4 mb-6">
-                <div class="relative flex-1">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-                    <input type="text" placeholder="Search holdings..." class="w-full glass rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
-                </div>
-                <button class="flex items-center space-x-2 glass rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-700/50 transition-colors">
-                    <i data-lucide="filter" class="w-4 h-4"></i>
-                    <span>Filter</span>
-                </button>
-            </div>
-
-            <!-- Holdings Table -->
-            <div class="glass rounded-xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-700/50">
-                            <tr>
-                                <th class="text-left p-4 text-gray-300 font-medium">Symbol</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Shares</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Avg Price</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Current Price</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Market Value</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Day Change</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Total Return</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="portfolioTableBody">
-                            <!-- Portfolio data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analysis Page -->
-        <div id="analysis" class="page hidden">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Analysis</h1>
-                    <p class="text-gray-400">Advanced portfolio analytics and market insights</p>
-                </div>
-                <div class="flex space-x-2">
-                    <button onclick="updateAnalysisTimeframe('1M')" class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm">1M</button>
-                    <button onclick="updateAnalysisTimeframe('3M')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">3M</button>
-                    <button onclick="updateAnalysisTimeframe('6M')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">6M</button>
-                    <button onclick="updateAnalysisTimeframe('1Y')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">1Y</button>
-                    <button onclick="updateAnalysisTimeframe('ALL')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">ALL</button>
-                </div>
-            </div>
-
-            <!-- Key Metrics -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="trending-up" class="w-6 h-6 text-green-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">YTD Return</p>
-                            <p class="text-2xl font-bold text-green-400">+18.7%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="activity" class="w-6 h-6 text-blue-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">Alpha</p>
-                            <p class="text-2xl font-bold text-blue-400">+4.2%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="target" class="w-6 h-6 text-yellow-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">Hit Rate</p>
-                            <p class="text-2xl font-bold text-yellow-400">67%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="bar-chart-3" class="w-6 h-6 text-purple-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">Correlation</p>
-                            <p class="text-2xl font-bold text-purple-400">0.85</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Performance Comparison -->
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-white mb-6">Performance Comparison</h3>
-                    <div class="chart-container">
-                        <canvas id="performanceChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Sector Allocation -->
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-white mb-6">Sector Allocation</h3>
-                    <div class="chart-container">
-                        <canvas id="sectorChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Monthly Returns -->
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-white mb-6">Monthly Returns</h3>
-                    <div class="chart-container">
-                        <canvas id="monthlyChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Risk Metrics -->
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-white mb-6">Risk Metrics</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg">
-                            <div>
-                                <p class="text-white font-medium">Beta</p>
-                                <p class="text-gray-400 text-sm">Portfolio volatility vs market</p>
-                            </div>
-                            <p class="text-xl font-bold text-purple-400">1.15</p>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg">
-                            <div>
-                                <p class="text-white font-medium">Sharpe Ratio</p>
-                                <p class="text-gray-400 text-sm">Risk-adjusted returns</p>
-                            </div>
-                            <p class="text-xl font-bold text-purple-400">1.42</p>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg">
-                            <div>
-                                <p class="text-white font-medium">Max Drawdown</p>
-                                <p class="text-gray-400 text-sm">Largest peak-to-trough decline</p>
-                            </div>
-                            <p class="text-xl font-bold text-purple-400">-8.5%</p>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg">
-                            <div>
-                                <p class="text-white font-medium">Volatility</p>
-                                <p class="text-gray-400 text-sm">Annualized standard deviation</p>
-                            </div>
-                            <p class="text-xl font-bold text-purple-400">18.2%</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Market Insights -->
-            <div class="glass rounded-xl p-6">
-                <h3 class="text-xl font-bold text-white mb-6">Market Insights</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <i data-lucide="trending-up" class="w-5 h-5 text-green-400"></i>
-                            <h4 class="text-green-400 font-medium">Bullish Signal</h4>
-                        </div>
-                        <p class="text-gray-300 text-sm">
-                            Portfolio showing strong momentum with consistent outperformance against benchmarks.
-                        </p>
-                    </div>
-                    
-                    <div class="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <i data-lucide="activity" class="w-5 h-5 text-yellow-400"></i>
-                            <h4 class="text-yellow-400 font-medium">Moderate Risk</h4>
-                        </div>
-                        <p class="text-gray-300 text-sm">
-                            Current volatility levels are within acceptable range for growth-oriented portfolio.
-                        </p>
-                    </div>
-                    
-                    <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <i data-lucide="pie-chart" class="w-5 h-5 text-blue-400"></i>
-                            <h4 class="text-blue-400 font-medium">Well Diversified</h4>
-                        </div>
-                        <p class="text-gray-300 text-sm">
-                            Sector allocation provides good balance between growth and stability.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Watchlist Page -->
-        <div id="watchlist" class="page hidden">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Watchlist</h1>
-                    <p class="text-gray-400">Track your favorite stocks and market opportunities</p>
-                </div>
-                <button onclick="showAddStock()" class="flex items-center space-x-2 gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    <span>Add Stock</span>
-                </button>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="star" class="w-6 h-6 text-blue-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">Watched Stocks</p>
-                            <p class="text-2xl font-bold text-white">12</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="trending-up" class="w-6 h-6 text-green-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">Gainers</p>
-                            <p class="text-2xl font-bold text-green-400">8</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="trending-down" class="w-6 h-6 text-red-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">Losers</p>
-                            <p class="text-2xl font-bold text-red-400">4</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="bell" class="w-6 h-6 text-yellow-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">Active Alerts</p>
-                            <p class="text-2xl font-bold text-yellow-400">5</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filters and Search -->
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex space-x-2">
-                    <button onclick="filterWatchlist('all')" class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm">All Stocks</button>
-                    <button onclick="filterWatchlist('watched')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">Watched</button>
-                    <button onclick="filterWatchlist('alerts')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">With Alerts</button>
-                </div>
-
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-                    <input type="text" placeholder="Search stocks..." class="glass rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
-                </div>
-            </div>
-
-            <!-- Watchlist Table -->
-            <div class="glass rounded-xl overflow-hidden mb-6">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-700/50">
-                            <tr>
-                                <th class="text-left p-4 text-gray-300 font-medium">Stock</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Price</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Change</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Volume</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Market Cap</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">P/E</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Alerts</th>
-                                <th class="text-left p-4 text-gray-300 font-medium">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="watchlistTableBody">
-                            <!-- Watchlist data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Market Movers -->
-            <div class="glass rounded-xl p-6">
-                <h3 class="text-xl font-bold text-white mb-6">Market Movers</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="text-green-400 font-medium mb-4 flex items-center">
-                            <i data-lucide="trending-up" class="w-4 h-4 mr-2"></i>
-                            Top Gainers
-                        </h4>
-                        <div class="space-y-3" id="topGainers">
-                            <!-- Top gainers will be populated by JavaScript -->
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-red-400 font-medium mb-4 flex items-center">
-                            <i data-lucide="trending-down" class="w-4 h-4 mr-2"></i>
-                            Top Losers
-                        </h4>
-                        <div class="space-y-3" id="topLosers">
-                            <!-- Top losers will be populated by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- News Page -->
-        <div id="news" class="page hidden">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Market News</h1>
-                    <p class="text-gray-400">Stay updated with the latest financial news and market insights</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button class="flex items-center space-x-2 glass rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-700/50 transition-colors">
-                        <i data-lucide="filter" class="w-4 h-4"></i>
-                        <span>Filter</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Market Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="trending-up" class="w-6 h-6 text-green-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">S&P 500</p>
-                            <p class="text-xl font-bold text-white">4,785.23</p>
-                            <p class="text-green-400 text-sm">+1.2%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="trending-up" class="w-6 h-6 text-blue-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">NASDAQ</p>
-                            <p class="text-xl font-bold text-white">15,234.67</p>
-                            <p class="text-blue-400 text-sm">+0.8%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="trending-down" class="w-6 h-6 text-yellow-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">DOW</p>
-                            <p class="text-xl font-bold text-white">38,456.12</p>
-                            <p class="text-yellow-400 text-sm">-0.3%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                            <i data-lucide="trending-up" class="w-6 h-6 text-purple-400"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">VIX</p>
-                            <p class="text-xl font-bold text-white">18.45</p>
-                            <p class="text-purple-400 text-sm">-2.1%</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search and Categories -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 mb-6">
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="filterNews('all')" class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm">All</button>
-                    <button onclick="filterNews('technology')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">Technology</button>
-                    <button onclick="filterNews('economy')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">Economy</button>
-                    <button onclick="filterNews('energy')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">Energy</button>
-                    <button onclick="filterNews('healthcare')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">Healthcare</button>
-                    <button onclick="filterNews('crypto')" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600">Crypto</button>
-                </div>
-
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-                    <input type="text" placeholder="Search news..." class="glass rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
-                </div>
-            </div>
-
-            <!-- News Articles -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6" id="newsContainer">
-                <!-- News articles will be populated by JavaScript -->
-            </div>
-
-            <!-- Load More -->
-            <div class="text-center">
-                <button onclick="loadMoreNews()" class="glass rounded-lg px-6 py-3 text-gray-300 hover:bg-gray-700/50 transition-colors">
-                    Load More Articles
-                </button>
-            </div>
-        </div>
-
-        <!-- Contact Page -->
-        <div id="contact" class="page hidden">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-white mb-4">Contact Us</h1>
-                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
-                    Get in touch with our team for support, inquiries, or partnership opportunities. 
-                    We're here to help you with your investment journey.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <!-- Contact Information -->
-                <div class="space-y-8">
-                    <div>
-                        <h2 class="text-2xl font-bold text-white mb-6">Get In Touch</h2>
-                        <p class="text-gray-300 mb-8">
-                            We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-                        </p>
-                    </div>
-
-                    <!-- Contact Details -->
-                    <div class="space-y-6">
-                        <div class="flex items-start space-x-4 p-6 glass rounded-xl">
-                            <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="mail" class="w-6 h-6 text-purple-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-white font-semibold mb-2">Email Address</h3>
-                                <p class="text-gray-300">hamzamohamedcod@gmail.com</p>
-                                <p class="text-gray-400 text-sm mt-1">
-                                    Send us an email anytime and we'll get back to you within 24 hours.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start space-x-4 p-6 glass rounded-xl">
-                            <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="phone" class="w-6 h-6 text-green-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-white font-semibold mb-2">Phone Number</h3>
-                                <p class="text-gray-300">+60 11-21026731</p>
-                                <p class="text-gray-400 text-sm mt-1">
-                                    Call us during business hours for immediate assistance.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start space-x-4 p-6 glass rounded-xl">
-                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="map-pin" class="w-6 h-6 text-blue-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-white font-semibold mb-2">Office Location</h3>
-                                <p class="text-gray-300">Malacca, Malaysia</p>
-                                <p class="text-gray-400 text-sm mt-1">
-                                    Visit us at our office for in-person consultations.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Business Hours -->
-                    <div class="p-6 glass rounded-xl">
-                        <div class="flex items-center space-x-3 mb-4">
-                            <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                                <i data-lucide="clock" class="w-6 h-6 text-yellow-400"></i>
-                            </div>
-                            <h3 class="text-white font-semibold">Business Hours</h3>
-                        </div>
-                        <div class="space-y-2 text-gray-300">
-                            <div class="flex justify-between">
-                                <span>Monday - Friday</span>
-                                <span>9:00 AM - 6:00 PM</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Saturday</span>
-                                <span>10:00 AM - 4:00 PM</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Sunday</span>
-                                <span>Closed</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contact Form -->
-                <div class="glass rounded-xl p-8">
-                    <h2 class="text-2xl font-bold text-white mb-6">Send us a Message</h2>
-                    
-                    <form id="contactForm" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-gray-300 text-sm font-medium mb-2">Full Name</label>
-                                <div class="relative">
-                                    <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-                                    <input type="text" required class="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors" placeholder="Enter your full name">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-300 text-sm font-medium mb-2">Email Address</label>
-                                <div class="relative">
-                                    <i data-lucide="mail" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-                                    <input type="email" required class="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors" placeholder="Enter your email address">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-gray-300 text-sm font-medium mb-2">Subject</label>
-                            <input type="text" required class="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors" placeholder="What is this regarding?">
-                        </div>
-
-                        <div>
-                            <label class="block text-gray-300 text-sm font-medium mb-2">Message</label>
-                            <div class="relative">
-                                <i data-lucide="message-square" class="absolute left-3 top-3 text-gray-400 w-4 h-4"></i>
-                                <textarea required rows="6" class="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors resize-none" placeholder="Tell us how we can help you..."></textarea>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="w-full gradient-bg text-white py-3 px-6 rounded-lg font-medium hover:opacity-90 transition-all duration-200 flex items-center justify-center space-x-2">
-                            <i data-lucide="send" class="w-4 h-4"></i>
-                            <span>Send Message</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- FAQ Section -->
-            <div class="mt-16">
-                <h2 class="text-2xl font-bold text-white text-center mb-8">Frequently Asked Questions</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="p-6 glass rounded-xl">
-                        <h3 class="text-white font-semibold mb-3">How secure is my investment data?</h3>
-                        <p class="text-gray-300 text-sm">
-                            We use bank-level encryption and security measures to protect your investment data. 
-                            Your information is never shared with third parties without your consent.
-                        </p>
-                    </div>
-
-                    <div class="p-6 glass rounded-xl">
-                        <h3 class="text-white font-semibold mb-3">What markets do you support?</h3>
-                        <p class="text-gray-300 text-sm">
-                            Our platform supports major global markets including NYSE, NASDAQ, LSE, and more. 
-                            We're constantly adding new markets and instruments.
-                        </p>
-                    </div>
-
-                    <div class="p-6 glass rounded-xl">
-                        <h3 class="text-white font-semibold mb-3">Is there a mobile app available?</h3>
-                        <p class="text-gray-300 text-sm">
-                            Yes, our mobile app is available for both iOS and Android devices. 
-                            You can download it from the App Store or Google Play Store.
-                        </p>
-                    </div>
-
-                    <div class="p-6 glass rounded-xl">
-                        <h3 class="text-white font-semibold mb-3">How do I get started?</h3>
-                        <p class="text-gray-300 text-sm">
-                            Simply create an account, verify your identity, and start tracking your investments. 
-                            Our onboarding process takes just a few minutes.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        // Global variables
-        let currentUser = null;
-        let notifications = [
-            { id: 1, title: 'Portfolio Alert', message: 'AAPL reached target price', type: 'success', time: '2 min ago' },
-            { id: 2, title: 'Market Update', message: 'S&P 500 up 1.2% today', type: 'info', time: '1 hour ago' },
-            { id: 3, title: 'Risk Warning', message: 'High volatility detected', type: 'warning', time: '3 hours ago' }
-        ];
-
-        // Sample data
-        const portfolioData = [
-            { symbol: 'AAPL', name: 'Apple Inc.', shares: 50, avgPrice: 150.25, currentPrice: 189.25, sector: 'Technology' },
-            { symbol: 'MSFT', name: 'Microsoft Corporation', shares: 25, avgPrice: 280.50, currentPrice: 343.00, sector: 'Technology' },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', shares: 30, avgPrice: 120.75, currentPrice: 138.50, sector: 'Technology' },
-            { symbol: 'AMZN', name: 'Amazon.com Inc.', shares: 15, avgPrice: 145.30, currentPrice: 151.75, sector: 'Consumer' },
-            { symbol: 'TSLA', name: 'Tesla Inc.', shares: 20, avgPrice: 220.00, currentPrice: 195.50, sector: 'Automotive' },
-            { symbol: 'NVDA', name: 'NVIDIA Corporation', shares: 12, avgPrice: 450.00, currentPrice: 875.25, sector: 'Technology' }
-        ];
-
-        const watchlistData = [
-            { symbol: 'META', name: 'Meta Platforms Inc.', price: 485.20, change: 12.45, changePercent: 2.63, volume: '15.2M', marketCap: '1.23T', pe: 24.5, isWatched: true, alerts: 2 },
-            { symbol: 'NFLX', name: 'Netflix Inc.', price: 445.75, change: -8.30, changePercent: -1.83, volume: '8.7M', marketCap: '198.5B', pe: 28.3, isWatched: true, alerts: 1 },
-            { symbol: 'AMD', name: 'Advanced Micro Devices', price: 142.85, change: 5.20, changePercent: 3.78, volume: '45.2M', marketCap: '230.8B', pe: 35.2, isWatched: true, alerts: 0 },
-            { symbol: 'CRM', name: 'Salesforce Inc.', price: 285.40, change: 3.15, changePercent: 1.12, volume: '6.8M', marketCap: '280.5B', pe: 42.1, isWatched: false, alerts: 1 },
-            { symbol: 'SHOP', name: 'Shopify Inc.', price: 78.90, change: -2.45, changePercent: -3.01, volume: '12.4M', marketCap: '98.7B', pe: 65.8, isWatched: true, alerts: 3 },
-            { symbol: 'SQ', name: 'Block Inc.', price: 68.25, change: 1.85, changePercent: 2.79, volume: '18.9M', marketCap: '39.2B', pe: -12.5, isWatched: false, alerts: 0 }
-        ];
-
-        const newsData = [
-            {
-                id: 1,
-                title: 'Tech Stocks Rally as AI Optimism Drives Market Higher',
-                summary: 'Major technology companies see significant gains as investors remain bullish on artificial intelligence developments and their potential impact on future earnings.',
-                category: 'technology',
-                source: 'Financial Times',
-                time: '2 hours ago',
-                impact: 'positive',
-                relatedStocks: ['AAPL', 'MSFT', 'GOOGL', 'NVDA']
-            },
-            {
-                id: 2,
-                title: 'Federal Reserve Signals Potential Rate Cuts in 2025',
-                summary: 'Fed officials hint at possible monetary policy adjustments as inflation shows signs of cooling, potentially benefiting growth stocks and real estate investments.',
-                category: 'economy',
-                source: 'Reuters',
-                time: '4 hours ago',
-                impact: 'positive',
-                relatedStocks: ['SPY', 'QQQ', 'IWM']
-            },
-            {
-                id: 3,
-                title: 'Energy Sector Faces Headwinds Amid Oil Price Volatility',
-                summary: 'Oil prices fluctuate as geopolitical tensions ease while demand concerns persist, creating uncertainty for energy sector investments.',
-                category: 'energy',
-                source: 'Bloomberg',
-                time: '6 hours ago',
-                impact: 'negative',
-                relatedStocks: ['XOM', 'CVX', 'COP']
-            },
-            {
-                id: 4,
-                title: 'Healthcare Innovation Drives Biotech Surge',
-                summary: 'Breakthrough developments in gene therapy and personalized medicine fuel investor interest in biotechnology companies.',
-                category: 'healthcare',
-                source: 'Wall Street Journal',
-                time: '8 hours ago',
-                impact: 'positive',
-                relatedStocks: ['JNJ', 'PFE', 'MRNA']
-            },
-            {
-                id: 5,
-                title: 'Cryptocurrency Market Shows Signs of Stabilization',
-                summary: 'Digital assets experience reduced volatility as institutional adoption continues and regulatory clarity improves across major markets.',
-                category: 'crypto',
-                source: 'CoinDesk',
-                time: '1 day ago',
-                impact: 'neutral',
-                relatedStocks: ['COIN', 'MSTR', 'SQ']
-            }
-        ];
-
-        // Authentication functions
-        function showLogin() {
-            document.getElementById('registerModal').classList.remove('show');
-            document.getElementById('loginModal').classList.add('show');
-        }
-
-        function showRegister() {
-            document.getElementById('loginModal').classList.remove('show');
-            document.getElementById('registerModal').classList.add('show');
-        }
-
-        function hideModals() {
-            document.getElementById('loginModal').classList.remove('show');
-            document.getElementById('registerModal').classList.remove('show');
-        }
-
-        function login(email, password) {
-            // Simulate login
-            currentUser = {
-                name: 'Hamza Ahmed',
-                email: email,
-                avatar: null
-            };
-            
-            document.getElementById('userName').textContent = currentUser.name;
-            document.getElementById('dropdownUserName').textContent = currentUser.name;
-            document.getElementById('dropdownUserEmail').textContent = currentUser.email;
-            
-            hideModals();
-            showNotification('Welcome back!', 'Successfully logged in', 'success');
-        }
-
-        function register(name, email, password) {
-            // Simulate registration
-            currentUser = {
-                name: name,
-                email: email,
-                avatar: null
-            };
-            
-            document.getElementById('userName').textContent = currentUser.name;
-            document.getElementById('dropdownUserName').textContent = currentUser.name;
-            document.getElementById('dropdownUserEmail').textContent = currentUser.email;
-            
-            hideModals();
-            showNotification('Account created!', 'Welcome to Stock Portfolio Monitor', 'success');
-        }
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('userName').textContent = 'Guest User';
-            document.getElementById('dropdownUserName').textContent = 'Guest User';
-            document.getElementById('dropdownUserEmail').textContent = 'guest@example.com';
-            hideUserDropdown();
-            showNotification('Logged out', 'See you next time!', 'info');
-        }
-
-        // Event listeners for forms
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            login(email, password);
-        });
-
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            register(name, email, password);
-        });
-
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showNotification('Message sent!', 'We\'ll get back to you soon', 'success');
-            this.reset();
-        });
-
-        // Page navigation
-        function showPage(pageId) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.add('hidden');
-            });
-            
-            // Show selected page
-            document.getElementById(pageId).classList.remove('hidden');
-            
-            // Update navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('sidebar-active');
-                link.classList.add('text-gray-300', 'hover:bg-gray-700/50', 'hover:text-white');
-            });
-            
-            // Highlight active nav
-            event.target.closest('.nav-link').classList.add('sidebar-active');
-            event.target.closest('.nav-link').classList.remove('text-gray-300', 'hover:bg-gray-700/50', 'hover:text-white');
-
-            // Load page-specific data
-            if (pageId === 'portfolio') {
-                loadPortfolioData();
-            } else if (pageId === 'analysis') {
-                loadAnalysisCharts();
-            } else if (pageId === 'watchlist') {
-                loadWatchlistData();
-            } else if (pageId === 'news') {
-                loadNewsData();
-            }
-        }
-
-        // Search functionality
-        function performSearch(query) {
-            const searchResults = document.getElementById('searchResults');
-            
-            if (query.length < 2) {
-                searchResults.classList.remove('show');
-                return;
-            }
-
-            // Simulate search results
-            const results = [
-                { type: 'stock', symbol: 'AAPL', name: 'Apple Inc.', price: '$189.25' },
-                { type: 'stock', symbol: 'MSFT', name: 'Microsoft Corp.', price: '$343.00' },
-                { type: 'stock', symbol: 'GOOGL', name: 'Alphabet Inc.', price: '$138.50' },
-                { type: 'portfolio', name: 'Tech Portfolio', value: '$45,230' },
-                { type: 'news', title: 'Tech Stocks Rally on AI News' }
-            ].filter(item => 
-                item.symbol?.toLowerCase().includes(query.toLowerCase()) ||
-                item.name?.toLowerCase().includes(query.toLowerCase()) ||
-                item.title?.toLowerCase().includes(query.toLowerCase())
-            );
-
-            if (results.length > 0) {
-                searchResults.innerHTML = results.map(result => `
-                    <div class="p-3 hover:bg-gray-700/50 cursor-pointer border-b border-gray-600 last:border-b-0">
-                        ${result.type === 'stock' ? `
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-white font-medium">${result.symbol}</p>
-                                    <p class="text-gray-400 text-sm">${result.name}</p>
-                                </div>
-                                <p class="text-gray-300">${result.price}</p>
-                            </div>
-                        ` : result.type === 'portfolio' ? `
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-white font-medium">${result.name}</p>
-                                    <p class="text-gray-400 text-sm">Portfolio</p>
-                                </div>
-                                <p class="text-gray-300">${result.value}</p>
-                            </div>
-                        ` : `
-                            <div>
-                                <p class="text-white font-medium">${result.title}</p>
-                                <p class="text-gray-400 text-sm">News Article</p>
-                            </div>
-                        `}
-                    </div>
-                `).join('');
-                searchResults.classList.add('show');
-            } else {
-                searchResults.innerHTML = '<div class="p-3 text-gray-400 text-center">No results found</div>';
-                searchResults.classList.add('show');
-            }
-        }
-
-        // Notification functions
-        function showNotification(title, message, type = 'info') {
-            const notification = document.getElementById('notification');
-            const icon = document.getElementById('notificationIcon');
-            const titleEl = document.getElementById('notificationTitle');
-            const messageEl = document.getElementById('notificationMessage');
-
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-
-            // Set icon and color based on type
-            icon.className = 'w-8 h-8 rounded-full flex items-center justify-center';
-            if (type === 'success') {
-                icon.classList.add('bg-green-500/20');
-                icon.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-green-400"></i>';
-            } else if (type === 'warning') {
-                icon.classList.add('bg-yellow-500/20');
-                icon.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-400"></i>';
-            } else if (type === 'error') {
-                icon.classList.add('bg-red-500/20');
-                icon.innerHTML = '<i data-lucide="x" class="w-4 h-4 text-red-400"></i>';
-            } else {
-                icon.classList.add('bg-blue-500/20');
-                icon.innerHTML = '<i data-lucide="info" class="w-4 h-4 text-blue-400"></i>';
-            }
-
-            lucide.createIcons();
-            notification.classList.add('show');
-
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 4000);
-        }
-
-        function toggleNotifications() {
-            // Show notification panel (simplified)
-            showNotification('Notifications', 'You have 3 new notifications', 'info');
-        }
-
-        function toggleUserDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        function hideUserDropdown() {
-            document.getElementById('userDropdown').classList.remove('show');
-        }
-
-        // Portfolio functions
-        function loadPortfolioData() {
-            const tbody = document.getElementById('portfolioTableBody');
-            tbody.innerHTML = portfolioData.map(stock => {
-                const marketValue = stock.shares * stock.currentPrice;
-                const dayChange = (stock.currentPrice - stock.avgPrice) * 0.1; // Simplified calculation
-                const dayChangePercent = (dayChange / stock.currentPrice) * 100;
-                const totalReturn = (stock.currentPrice - stock.avgPrice) * stock.shares;
-                const totalReturnPercent = ((stock.currentPrice - stock.avgPrice) / stock.avgPrice) * 100;
-
-                return `
-                    <tr class="border-t border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-                        <td class="p-4">
-                            <div>
-                                <p class="text-white font-medium">${stock.symbol}</p>
-                                <p class="text-gray-400 text-sm">${stock.name}</p>
-                            </div>
-                        </td>
-                        <td class="p-4 text-white">${stock.shares}</td>
-                        <td class="p-4 text-white">$${stock.avgPrice.toFixed(2)}</td>
-                        <td class="p-4 text-white">$${stock.currentPrice.toFixed(2)}</td>
-                        <td class="p-4 text-white font-medium">$${marketValue.toLocaleString()}</td>
-                        <td class="p-4">
-                            <div class="flex items-center space-x-1 ${dayChange >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                <i data-lucide="${dayChange >= 0 ? 'trending-up' : 'trending-down'}" class="w-4 h-4"></i>
-                                <span>${dayChange >= 0 ? '+' : ''}$${dayChange.toFixed(2)}</span>
-                                <span>(${dayChangePercent >= 0 ? '+' : ''}${dayChangePercent.toFixed(2)}%)</span>
-                            </div>
-                        </td>
-                        <td class="p-4">
-                            <div class="${totalReturn >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                <p class="font-medium">${totalReturn >= 0 ? '+' : ''}$${totalReturn.toFixed(2)}</p>
-                                <p class="text-sm">(${totalReturnPercent >= 0 ? '+' : ''}${totalReturnPercent.toFixed(1)}%)</p>
-                            </div>
-                        </td>
-                        <td class="p-4">
-                            <button class="p-2 hover:bg-gray-600/50 rounded-lg transition-colors">
-                                <i data-lucide="more-vertical" class="w-4 h-4 text-gray-400"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        // Watchlist functions
-        function loadWatchlistData() {
-            const tbody = document.getElementById('watchlistTableBody');
-            tbody.innerHTML = watchlistData.map(stock => `
-                <tr class="border-t border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-                    <td class="p-4">
-                        <div class="flex items-center space-x-3">
-                            <button onclick="toggleWatch('${stock.symbol}')" class="p-1 rounded ${stock.isWatched ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'}">
-                                <i data-lucide="star" class="w-4 h-4 ${stock.isWatched ? 'fill-current' : ''}"></i>
-                            </button>
-                            <div>
-                                <p class="text-white font-medium">${stock.symbol}</p>
-                                <p class="text-gray-400 text-sm">${stock.name}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="p-4 text-white font-medium">$${stock.price.toFixed(2)}</td>
-                    <td class="p-4">
-                        <div class="flex items-center space-x-1 ${stock.change >= 0 ? 'text-green-400' : 'text-red-400'}">
-                            <i data-lucide="${stock.change >= 0 ? 'trending-up' : 'trending-down'}" class="w-4 h-4"></i>
-                            <div>
-                                <p class="font-medium">${stock.change >= 0 ? '+' : ''}$${stock.change.toFixed(2)}</p>
-                                <p class="text-sm">(${stock.changePercent >= 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%)</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="p-4 text-gray-300">${stock.volume}</td>
-                    <td class="p-4 text-gray-300">${stock.marketCap}</td>
-                    <td class="p-4 text-gray-300">${stock.pe > 0 ? stock.pe.toFixed(1) : 'N/A'}</td>
-                    <td class="p-4">
-                        ${stock.alerts > 0 ? `
-                            <div class="flex items-center space-x-1">
-                                <i data-lucide="bell" class="w-4 h-4 text-yellow-400"></i>
-                                <span class="text-yellow-400 text-sm">${stock.alerts}</span>
-                            </div>
-                        ` : '<span class="text-gray-500 text-sm">None</span>'}
-                    </td>
-                    <td class="p-4">
-                        <div class="flex items-center space-x-2">
-                            <button class="p-2 hover:bg-gray-600/50 rounded-lg transition-colors">
-                                <i data-lucide="target" class="w-4 h-4 text-gray-400"></i>
-                            </button>
-                            <button class="p-2 hover:bg-gray-600/50 rounded-lg transition-colors">
-                                <i data-lucide="more-vertical" class="w-4 h-4 text-gray-400"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-
-            // Load market movers
-            loadMarketMovers();
-            lucide.createIcons();
-        }
-
-        function loadMarketMovers() {
-            const gainers = watchlistData.filter(stock => stock.change > 0).sort((a, b) => b.changePercent - a.changePercent).slice(0, 3);
-            const losers = watchlistData.filter(stock => stock.change < 0).sort((a, b) => a.changePercent - b.changePercent).slice(0, 3);
-
-            document.getElementById('topGainers').innerHTML = gainers.map(stock => `
-                <div class="flex items-center justify-between p-3 bg-green-500/10 rounded-lg">
-                    <div>
-                        <p class="text-white font-medium">${stock.symbol}</p>
-                        <p class="text-gray-400 text-sm">$${stock.price.toFixed(2)}</p>
-                    </div>
-                    <p class="text-green-400 font-medium">+${stock.changePercent.toFixed(2)}%</p>
-                </div>
-            `).join('');
-
-            document.getElementById('topLosers').innerHTML = losers.map(stock => `
-                <div class="flex items-center justify-between p-3 bg-red-500/10 rounded-lg">
-                    <div>
-                        <p class="text-white font-medium">${stock.symbol}</p>
-                        <p class="text-gray-400 text-sm">$${stock.price.toFixed(2)}</p>
-                    </div>
-                    <p class="text-red-400 font-medium">${stock.changePercent.toFixed(2)}%</p>
-                </div>
-            `).join('');
-        }
-
-        function toggleWatch(symbol) {
-            const stock = watchlistData.find(s => s.symbol === symbol);
-            if (stock) {
-                stock.isWatched = !stock.isWatched;
-                loadWatchlistData();
-                showNotification(
-                    stock.isWatched ? 'Added to watchlist' : 'Removed from watchlist',
-                    `${symbol} ${stock.isWatched ? 'added to' : 'removed from'} your watchlist`,
-                    'success'
-                );
-            }
-        }
-
-        // News functions
-        function loadNewsData() {
-            const container = document.getElementById('newsContainer');
-            container.innerHTML = newsData.map(article => `
-                <div class="glass rounded-xl overflow-hidden hover:border-purple-500/50 transition-colors">
-                    <div class="p-6">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center space-x-2">
-                                <span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">
-                                    ${article.category.charAt(0).toUpperCase() + article.category.slice(1)}
-                                </span>
-                                <div class="flex items-center space-x-1 ${article.impact === 'positive' ? 'text-green-400' : article.impact === 'negative' ? 'text-red-400' : 'text-gray-400'}">
-                                    <i data-lucide="${article.impact === 'positive' ? 'trending-up' : article.impact === 'negative' ? 'trending-down' : 'clock'}" class="w-4 h-4"></i>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button class="p-2 hover:bg-gray-600/50 rounded-lg transition-colors">
-                                    <i data-lucide="bookmark" class="w-4 h-4 text-gray-400"></i>
-                                </button>
-                                <button class="p-2 hover:bg-gray-600/50 rounded-lg transition-colors">
-                                    <i data-lucide="share" class="w-4 h-4 text-gray-400"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <h3 class="text-xl font-bold text-white mb-3 line-clamp-2">
-                            ${article.title}
-                        </h3>
-
-                        <p class="text-gray-300 mb-4 line-clamp-3">
-                            ${article.summary}
-                        </p>
-
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-2 text-sm text-gray-400">
-                                <i data-lucide="clock" class="w-4 h-4"></i>
-                                <span>${article.time}</span>
-                                <span>•</span>
-                                <span>${article.source}</span>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div class="flex flex-wrap gap-1">
-                                ${article.relatedStocks.slice(0, 3).map(stock => `
-                                    <span class="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded">${stock}</span>
-                                `).join('')}
-                                ${article.relatedStocks.length > 3 ? `
-                                    <span class="px-2 py-1 bg-gray-700/50 text-gray-400 text-xs rounded">
-                                        +${article.relatedStocks.length - 3} more
-                                    </span>
-                                ` : ''}
-                            </div>
-
-                            <button class="flex items-center space-x-1 text-purple-400 hover:text-purple-300 transition-colors">
-                                <span class="text-sm">Read more</span>
-                                <i data-lucide="external-link" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        // Chart functions
-        let portfolioChart, performanceChart, sectorChart, monthlyChart;
-
-        function initializeCharts() {
-            // Portfolio Performance Chart
-            const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
-            portfolioChart = new Chart(portfolioCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Oct 2024', 'Nov 2024', 'Dec 2024', 'Jan 2025'],
-                    datasets: [{
-                        label: 'Portfolio',
-                        data: [65000, 68000, 70000, 72518],
-                        borderColor: '#10B981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }, {
-                        label: 'S&P 500',
-                        data: [62000, 64000, 65500, 67000],
-                        borderColor: '#3B82F6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#D1D5DB'
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                color: '#9CA3AF'
-                            },
-                            grid: {
-                                color: 'rgba(107, 114, 128, 0.3)'
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                color: '#9CA3AF'
-                            },
-                            grid: {
-                                color: 'rgba(107, 114, 128, 0.3)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function loadAnalysisCharts() {
-            setTimeout(() => {
-                // Performance Comparison Chart
-                const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-                if (performanceChart) performanceChart.destroy();
-                performanceChart = new Chart(performanceCtx, {
-                    type: 'line',
-                    data: {
-                        labels: ['2024-10-01', '2024-10-15', '2024-11-01', '2024-11-15', '2024-12-01', '2024-12-15'],
-                        datasets: [{
-                            label: 'Portfolio',
-                            data: [65000, 67200, 68500, 70100, 71200, 72518],
-                            borderColor: '#8B5CF6',
-                            backgroundColor: 'rgba(139, 92, 246, 0.3)',
-                            fill: true,
-                            tension: 0.4
-                        }, {
-                            label: 'S&P 500',
-                            data: [62000, 63200, 64000, 64800, 65500, 67000],
-                            borderColor: '#10B981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.3)',
-                            fill: true,
-                            tension: 0.4
-                        }, {
-                            label: 'NASDAQ',
-                            data: [63500, 64800, 65200, 66100, 66800, 68200],
-                            borderColor: '#3B82F6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: '#D1D5DB'
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    color: '#9CA3AF'
-                                },
-                                grid: {
-                                    color: 'rgba(107, 114, 128, 0.3)'
-                                }
-                            },
-                            y: {
-                                ticks: {
-                                    color: '#9CA3AF'
-                                },
-                                grid: {
-                                    color: 'rgba(107, 114, 128, 0.3)'
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // Sector Allocation Chart
-                const sectorCtx = document.getElementById('sectorChart').getContext('2d');
-                if (sectorChart) sectorChart.destroy();
-                sectorChart = new Chart(sectorCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Technology', 'Healthcare', 'Finance', 'Consumer', 'Energy'],
-                        datasets: [{
-                            data: [45, 20, 15, 12, 8],
-                            backgroundColor: [
-                                '#8B5CF6',
-                                '#10B981',
-                                '#F59E0B',
-                                '#EF4444',
-                                '#3B82F6'
-                            ],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    color: '#D1D5DB',
-                                    padding: 20
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // Monthly Returns Chart
-                const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-                if (monthlyChart) monthlyChart.destroy();
-                monthlyChart = new Chart(monthlyCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                        datasets: [{
-                            label: 'Monthly Returns (%)',
-                            data: [3.2, -1.8, 4.5, 2.1, 5.8, 1.9],
-                            backgroundColor: '#8B5CF6',
-                            borderRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: '#D1D5DB'
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    color: '#9CA3AF'
-                                },
-                                grid: {
-                                    color: 'rgba(107, 114, 128, 0.3)'
-                                }
-                            },
-                            y: {
-                                ticks: {
-                                    color: '#9CA3AF'
-                                },
-                                grid: {
-                                    color: 'rgba(107, 114, 128, 0.3)'
-                                }
-                            }
-                        }
-                    }
-                });
-            }, 100);
-        }
-
-        // Utility functions
-        function updateChart(period) {
-            // Update chart based on period
-            showNotification('Chart updated', `Showing ${period} data`, 'info');
-        }
-
-        function updateAnalysisTimeframe(period) {
-            // Update analysis timeframe
-            showNotification('Timeframe updated', `Showing ${period} analysis`, 'info');
-        }
-
-        function filterWatchlist(filter) {
-            // Filter watchlist
-            showNotification('Filter applied', `Showing ${filter} stocks`, 'info');
-        }
-
-        function filterNews(category) {
-            // Filter news by category
-            showNotification('News filtered', `Showing ${category} news`, 'info');
-        }
-
-        function loadMoreNews() {
-            showNotification('Loading...', 'Fetching more articles', 'info');
-        }
-
-        function showAddPosition() {
-            showNotification('Add Position', 'Feature coming soon!', 'info');
-        }
-
-        function showAddStock() {
-            showNotification('Add Stock', 'Feature coming soon!', 'info');
-        }
-
-        function showProfile() {
-            hideUserDropdown();
-            showNotification('Profile', 'Profile settings coming soon!', 'info');
-        }
-
-        function showNotificationSettings() {
-            hideUserDropdown();
-            showNotification('Notifications', 'Notification settings coming soon!', 'info');
-        }
-
-        // Initialize everything when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-            
-            // Show login modal if not logged in
-            if (!currentUser) {
-                setTimeout(() => {
-                    showLogin();
-                }, 1000);
-            }
-
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('#userDropdown') && !e.target.closest('button[onclick="toggleUserDropdown()"]')) {
-                    hideUserDropdown();
-                }
-                if (!e.target.closest('#searchResults') && !e.target.closest('#searchInput')) {
-                    document.getElementById('searchResults').classList.remove('show');
-                }
-            });
-
-            // Close modals when clicking outside
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('modal')) {
-                    hideModals();
-                }
-            });
-        });
-    </script>
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/portfolio.js"></script>
 </body>
 </html>
 
